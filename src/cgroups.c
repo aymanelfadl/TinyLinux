@@ -1,5 +1,13 @@
 #include "cgroups.h"
 
+/*
+ * cgroup v2 is controlled through files under /sys/fs/cgroup.
+ * To configure a cgroup, we write values into files like:
+ *   memory.max
+ *   pids.max
+ *   cpu.max
+ *   cgroup.procs
+ */
 static int write_file(const char *path, const char *value)
 {
     int     fd;
@@ -31,6 +39,10 @@ static int write_file(const char *path, const char *value)
     return 0;
 }
 
+/*
+ * cgroup.procs expects a PID written as text.
+ * Writing a PID into this file moves that process into the cgroup.
+ */
 static int write_pid_file(const char *path, pid_t pid)
 {
     char buffer[32];
@@ -39,6 +51,14 @@ static int write_pid_file(const char *path, pid_t pid)
     return write_file(path, buffer);
 }
 
+/*
+ * The CLI accepts human-readable memory values like:
+ *   20M
+ *   512K
+ *   1G
+ *
+ * But cgroup v2 memory.max expects bytes.
+ */
 static unsigned long parse_memory_to_bytes(const char *value)
 {
     char            *end;
@@ -58,6 +78,11 @@ static unsigned long parse_memory_to_bytes(const char *value)
     return 0;
 }
 
+/*
+ * memory.max limits the total memory used by processes in this cgroup.
+ * memory.swap.max = 0 disables swap usage for this cgroup, which makes
+ * memory-limit tests easier to observe.
+ */
 static int set_memory_limit(const char *value)
 {
     char            buffer[64];
@@ -81,11 +106,24 @@ static int set_memory_limit(const char *value)
     return 0;
 }
 
+/*
+ * pids.max limits how many processes/threads can exist inside the cgroup.
+ */
 static int set_pids_limit(const char *value)
 {
     return write_file(CGROUP_PATH "/pids.max", value);
 }
 
+/*
+ * cpu.max format:
+ *   <quota> <period>
+ *
+ * Example:
+ *   50000 100000
+ *
+ * This means the cgroup can use 50ms of CPU every 100ms,
+ * which is about 50% of one CPU core.
+ */
 static int set_cpu_limit(const char *value)
 {
     char    buffer[64];
@@ -106,6 +144,12 @@ static int set_cpu_limit(const char *value)
     return write_file(CGROUP_PATH "/cpu.max", buffer);
 }
 
+/*
+ * Create the cgroup, configure its limits, then move the child process into it.
+ *
+ * The child_pid must be the PID from the host namespace, because cgroup.procs
+ * is written by the parent from the host side.
+ */
 int setup_cgroup(t_sandbox_config *config, pid_t child_pid)
 {
     if (mkdir(CGROUP_PATH, 0755) == -1 && errno != EEXIST)
@@ -129,6 +173,10 @@ int setup_cgroup(t_sandbox_config *config, pid_t child_pid)
     return 0;
 }
 
+/*
+ * Remove the cgroup after the sandboxed process exits.
+ * This only works if no process is still inside the cgroup.
+ */
 int cleanup_cgroup(void)
 {
     if (rmdir(CGROUP_PATH) == -1)

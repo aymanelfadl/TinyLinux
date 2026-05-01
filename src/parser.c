@@ -6,6 +6,7 @@ static void init_config(t_sandbox_config *config)
     config->memory_limit = NULL;
     config->cpu_limit = NULL;
     config->pids_limit = NULL;
+    config->rootfs = NULL;
     config->command = NULL;
 }
 
@@ -19,6 +20,7 @@ static void print_usage(const char *program_name)
         "  --mem <limit>         Set memory limit, example: 100M\n"
         "  --cpu <limit>         Set CPU limit percentage, example: 50\n"
         "  --pids <limit>        Set max number of processes, example: 20\n\n"
+        "  --rootfs <path>       Set root filesystem path\n"
         "Example:\n"
         "  sudo %s --hostname box1 --mem 100M --cpu 50 --pids 20 -- /bin/bash\n",
         program_name,
@@ -122,6 +124,8 @@ static int is_valid_pids_limit(const char *value)
 }
 
 
+
+
 int parse_arguments(int argc, char **argv, t_sandbox_config *config)
 {
     int i;
@@ -183,7 +187,14 @@ int parse_arguments(int argc, char **argv, t_sandbox_config *config)
                 return 1;
             config->pids_limit = argv[i + 1];
             i += 2;
-}
+        }
+        else if (is_option(argv[i], "--rootfs"))
+        {
+            if (require_value(i, argc, "--rootfs"))
+                return 1;
+            config->rootfs = argv[i + 1];
+            i += 2;
+        }
         else
         {
             fprintf(stderr, "Error: unknown option: %s\n", argv[i]);

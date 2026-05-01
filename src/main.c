@@ -2,6 +2,16 @@
 #include "minibox.h"
 #include "parser.h"
 
+/*
+ * main() stays intentionally small.
+ *
+ * Its job is only to:
+ *   1. parse CLI arguments
+ *   2. store them in the config struct
+ *   3. start the sandbox
+ *
+ * All namespace, cgroup, and rootfs logic lives in separate modules.
+ */
 int main(int argc, char **argv)
 {
     t_sandbox_config config;

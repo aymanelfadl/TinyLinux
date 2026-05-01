@@ -23,12 +23,14 @@ typedef struct s_sandbox_config
     char    *memory_limit;
     char    *cpu_limit;
     char    *pids_limit;
+    char    *rootfs;
     char    **command;
 }   t_sandbox_config;
 
 typedef struct s_child_args
 {
     t_sandbox_config *config;
+    int              sync_fd;
 }   t_child_args;
 
 int start_sandbox(t_sandbox_config *config);

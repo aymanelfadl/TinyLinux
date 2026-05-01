@@ -1,0 +1,9 @@
+bf431fd3850ede4d652a3c410d4992a3  usr/lib/x86_64-linux-gnu/security/pam_cap.so
+82f61c35b673980a337edd41db67c798  usr/share/doc/libpam-cap/changelog.Debian.amd64.gz
+7cc6e869ab0420148c12d25e745f1fc4  usr/share/doc/libpam-cap/changelog.Debian.gz
+7a60e96cffd7432d5fb38b3d4e6f690c  usr/share/doc/libpam-cap/changelog.gz
+e9952c9912a0c776183f79942c8e6cb4  usr/share/doc/libpam-cap/copyright
+3b051f383febdd6a8df6c4180e8e2934  usr/share/lintian/overrides/libpam-cap
+ec36eafed5239c916fa66a2604d5b242  usr/share/man/man5/capability.conf.5.gz
+1c0d71ce63bd842d947e481939e9d016  usr/share/man/man8/pam_cap.8.gz
+597992b1cd66ad28fa4ab9664239a43d  usr/share/pam-configs/capability
